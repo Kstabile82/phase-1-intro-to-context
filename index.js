@@ -1,55 +1,75 @@
-function createEmployeeRecord(famArray) {
-    let famObj = { 
-        firstName: famArray[0], 
-        familyName: famArray[1], 
-        title: famArray[2], 
-        payPerHour: famArray[3], 
+function createEmployeeRecord(emplArray) {
+    let emplObj = { 
+        firstName: emplArray[0], 
+        familyName: emplArray[1], 
+        title: emplArray[2], 
+        payPerHour: emplArray[3], 
         timeInEvents: [], 
         timeOutEvents: [], 
-    }; 
-    return famObj; 
-    //could i have done this as famArray.map(famObj => famObj.key = famArray.idx)
-    //or forEach.famArray.index(famObj.key => famObj.key = famArray.index)
-}
-// function createEmployeeRecord (famArray) {
-//     let famObj =  {
-//         firstName: "",
-//         familyName: "", 
-//         title: "", 
-//         payPerHour: 0, 
-//     }
-//     const familyRecord = famArray.map(family => {
-//         Object.assign(...famArray);
-//     });
-//     famObj.timeInEvent = []; 
-//     famObj.timeOutEvent = []; 
-// }
+    }
+    return emplObj;
+} 
 
 function createEmployeeRecords(arrOfArrays) {
     //map over inner arrays, destructure 
-    return arrOfArrays.map(innerArr => {
-        const [firstName, familyName, title, payPerHour] = innerArr; 
-        return {firstName, familyName, title, payPerHour}; 
-    })
-    
+    // return arrOfArrays.map(innerArr => {
+    //     const [firstName, familyName, title, payPerHour] = innerArr; 
+    //     return {firstName, familyName, title, payPerHour}; 
+    // })
+    return arrOfArrays.map((employee) => createEmployeeRecord(employee))
 }
 function createTimeInEvent(recordObj, dateStamp) {
     const [date, hour] = dateStamp.split(" ")
     let newObj = {
         type: "TimeIn",
-        hour, 
+        hour: parseInt(hour, 10),   //dont need : if the name is the same for key and its value 
         date
     }; 
-    recordObj.timeInEvents.push(newObj);
+    recordObj.timeInEvents.push(newObj)
     return recordObj; 
 }
+
 function createTimeOutEvent(recordObj, dateStamp) {
+    const [date, hour] = dateStamp.split(" ")
     let newObj = {
         type: "TimeOut",
-        hour: dateStamp.hour,//derived from arg
-        date: dateStamp.date//derived from arg
+        hour: parseInt(hour, 10), 
+        date
     }; 
-    let timeOutArr = recordObj.timeOutEvents;
-    timeOutArr.push(newObj);
-    return timeOutArr; 
+    recordObj.timeOutEvents.push(newObj);
+    return recordObj; 
+}
+
+function hoursWorkedOnDate(emplRecordObj, date) {
+    const timeIn = emplRecordObj.timeInEvents.find(event => event.date === date).hour
+    const timeOut = emplRecordObj.timeOutEvents.find(event => event.date === date).hour
+    return (timeOut-timeIn)/100; 
+    // for (date of emplRecordObj) {    //how do i grab emplRecordObj by date? 
+    // for (date of emplRecordObj) {    //how do i grab emplRecordObj by date? 
+
+    //    return emplRecordObj.reduce; 
+        
+    // }
+    
+}
+function wagesEarnedOnDate(emplRecordObj, date) {
+        return emplRecordObj.payPerHour * hoursWorkedOnDate(emplRecordObj, date);
+    
+}
+function allWagesFor(emplRecordObj) {
+    const wagesTotal = emplRecordObj.timeInEvents.map((event) => wagesEarnedOnDate(emplRecordObj, event.date))
+      return wagesTotal.reduce((total, amount) => total + amount)
+}
+
+function calculatePayroll(emplRecordsArr) {
+    const calcPay = emplRecordsArr.map((employee) => { 
+        return employee.timeInEvents.map((event) => wagesEarnedOnDate(employee, event.date))
+    })
+    //rewrite calcpayroll using allwagesfor 
+    
+    return calcPay.map((employee) => {
+       let totalVar = 0; 
+       return totalVar += employee.reduce((total, amount) => total + amount)
+    }).reduce((amount, total) => amount + total)
+
 }
